@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.cvlab.aiedu.mapper.SubjectMapper">
+    
+    <resultMap type="Subject" id="SubjectResult">
+        <result property="subjectId"    column="subject_id"    />
+        <result property="subjectName"    column="subject_name"    />
+        <result property="status"    column="status"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectSubjectVo">
+        select subject_id, subject_name, status, del_flag, create_by, create_time, update_by, update_time from aiedu_subject
+    </sql>
+
+    <select id="selectSubjectList" parameterType="Subject" resultMap="SubjectResult">
+        <include refid="selectSubjectVo"/>
+        <where>  
+            <if test="subjectName != null  and subjectName != ''"> and subject_name like concat('%', #{subjectName}, '%')</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''"> and create_time between #{params.beginCreateTime} and #{params.endCreateTime}</if>
+            <if test="params.beginUpdateTime != null and params.beginUpdateTime != '' and params.endUpdateTime != null and params.endUpdateTime != ''"> and update_time between #{params.beginUpdateTime} and #{params.endUpdateTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectSubjectBySubjectId" parameterType="Long" resultMap="SubjectResult">
+        <include refid="selectSubjectVo"/>
+        where subject_id = #{subjectId}
+    </select>
+        
+    <insert id="insertSubject" parameterType="Subject" useGeneratedKeys="true" keyProperty="subjectId">
+        insert into aiedu_subject
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="subjectName != null and subjectName != ''">subject_name,</if>
+            <if test="status != null">status,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="subjectName != null and subjectName != ''">#{subjectName},</if>
+            <if test="status != null">#{status},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateSubject" parameterType="Subject">
+        update aiedu_subject
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="subjectName != null and subjectName != ''">subject_name = #{subjectName},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where subject_id = #{subjectId}
+    </update>
+
+    <delete id="deleteSubjectBySubjectId" parameterType="Long">
+        delete from aiedu_subject where subject_id = #{subjectId}
+    </delete>
+
+    <delete id="deleteSubjectBySubjectIds" parameterType="String">
+        delete from aiedu_subject where subject_id in 
+        <foreach item="subjectId" collection="array" open="(" separator="," close=")">
+            #{subjectId}
+        </foreach>
+    </delete>
+</mapper>
